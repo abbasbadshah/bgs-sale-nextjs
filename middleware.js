@@ -4,40 +4,31 @@ import { verifyToken } from "@/utils/auth";
 export function middleware(request) {
   const token = request.cookies.get("token")?.value;
 
-  // Paths that don't require authentication
-  const publicPaths = ["/auth/login", "/auth/register"];
-  const isPublicPath = publicPaths.includes(request.nextUrl.pathname);
+  // Allow only the login route to be public
+  const isLoginPath = request.nextUrl.pathname === "/auth/login";
 
-  if (!token && !isPublicPath) {
+  // Redirect to login if no token is present and the path is not the login route
+  if (!token && !isLoginPath) {
     return NextResponse.redirect(new URL("/auth/login", request.url));
   }
 
-  if (token && isPublicPath) {
+  // Redirect logged-in users trying to access the login page to the dashboard
+  if (token && isLoginPath) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
-  // For protected routes, verify role-based access
-  if (token && !isPublicPath) {
+  // If a token exists, validate it for protected routes
+  if (token) {
     const decoded = verifyToken(token);
     if (!decoded) {
       return NextResponse.redirect(new URL("/auth/login", request.url));
     }
-
-    // Check admin routes
-    const isAdminRoute = request.nextUrl.pathname.startsWith("/admin");
-    if (isAdminRoute && decoded.role !== "admin") {
-      return NextResponse.redirect(new URL("/dashboard", request.url));
-    }
   }
 
+  // Allow access to the route if all checks pass
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: [
-    "/dashboard/:path*",
-    "/admin/:path*",
-    "/auth/login",
-    "/auth/register",
-  ],
+  matcher: ["/:path*"], // Apply middleware to all routes, including "/"
 };

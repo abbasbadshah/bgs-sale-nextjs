@@ -92,7 +92,7 @@ const SalesReport = ({ data, period }) => {
           <Text style={styles.shopName}>
             Badshah General Store Masakin Branch
           </Text>
-          <Text style={styles.title}>Sales Report</Text>
+          <Text style={styles.title}>Daily Sales Report</Text>
           <Text style={styles.subtitle}>Period: {period}</Text>
           <Text style={styles.subtitle}>
             Date: {new Date().toLocaleDateString()}
@@ -101,24 +101,28 @@ const SalesReport = ({ data, period }) => {
 
         <View style={styles.table}>
           <View style={[styles.tableRow, styles.tableHeader]}>
-            <Text style={[styles.tableCell, styles.col1]}>Date</Text>
-            <Text style={[styles.tableCell, styles.col2]}>Products</Text>
-            <Text style={[styles.tableCell, styles.col3]}>Amount</Text>
-            <Text style={[styles.tableCell, styles.col4]}>Created At</Text>
+            <Text style={[styles.tableCell, { width: "20%" }]}>Date</Text>
+            <Text style={[styles.tableCell, { width: "30%" }]}>Products</Text>
+            <Text style={[styles.tableCell, { width: "15%" }]}>Payment</Text>
+            <Text style={[styles.tableCell, { width: "15%" }]}>Amount</Text>
+            <Text style={[styles.tableCell, { width: "20%" }]}>Created At</Text>
           </View>
 
           {data.map((entry, index) => (
             <View key={index} style={styles.tableRow}>
-              <Text style={[styles.tableCell, styles.col1]}>
+              <Text style={[styles.tableCell, { width: "20%" }]}>
                 {new Date(entry.date).toLocaleDateString()}
               </Text>
-              <Text style={[styles.tableCell, styles.col2]}>
+              <Text style={[styles.tableCell, { width: "30%" }]}>
                 {entry.products.join(", ")}
               </Text>
-              <Text style={[styles.tableCell, styles.col3]}>
+              <Text style={[styles.tableCell, { width: "15%" }]}>
+                {entry.paymentType}
+              </Text>
+              <Text style={[styles.tableCell, { width: "15%" }]}>
                 Rs. {Number(entry.totalAmount).toFixed(2)}
               </Text>
-              <Text style={[styles.tableCell, styles.col4]}>
+              <Text style={[styles.tableCell, { width: "20%" }]}>
                 {new Date(entry.createdAt).toLocaleString()}
               </Text>
             </View>
@@ -282,7 +286,7 @@ const OnlineSaleForm = () => {
   const fetchSales = async () => {
     setIsTableLoading(true);
     try {
-      const response = await fetch("/api/sales/online");
+      const response = await fetch("/api/daily-sales");
       const result = await response.json();
 
       if (result.success && Array.isArray(result.data)) {
@@ -372,7 +376,7 @@ const OnlineSaleForm = () => {
         date: new Date().toISOString(),
       };
 
-      const response = await fetch("/api/sales/online", {
+      const response = await fetch("/api/daily-sales", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -441,7 +445,7 @@ const OnlineSaleForm = () => {
         {/* Form Section */}
         <div className="bg-white shadow-lg rounded-lg px-8 py-6">
           <h2 className="text-2xl font-bold text-gray-900 text-center mb-8">
-            Record Online Sale
+            Record Daily Sale
           </h2>
 
           {error && (
@@ -477,29 +481,51 @@ const OnlineSaleForm = () => {
                 </p>
               )}
             </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Payment Type
+                </label>
+                <select
+                  {...register("paymentType", {
+                    required: "Payment type is required",
+                  })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                >
+                  <option value="">Select payment type</option>
+                  <option value="cash">Cash</option>
+                  <option value="online">Online</option>
+                </select>
+                {errors.paymentType && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.paymentType.message}
+                  </p>
+                )}
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Total Amount
-              </label>
-              <input
-                type="number"
-                step="0.01"
-                {...register("totalAmount", {
-                  required: "Total amount is required",
-                  min: {
-                    value: 0.01,
-                    message: "Amount must be greater than 0",
-                  },
-                })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-                placeholder="Enter total amount"
-              />
-              {errors.totalAmount && (
-                <p className="mt-1 text-sm text-red-600">
-                  {errors.totalAmount.message}
-                </p>
-              )}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Total Amount
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  {...register("totalAmount", {
+                    required: "Total amount is required",
+                    min: {
+                      value: 0.01,
+                      message: "Amount must be greater than 0",
+                    },
+                  })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                  placeholder="Enter total amount"
+                />
+                {errors.totalAmount && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.totalAmount.message}
+                  </p>
+                )}
+              </div>
             </div>
 
             <button
@@ -553,6 +579,9 @@ const OnlineSaleForm = () => {
                   Products
                 </th>
                 <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Payment Type
+                </th>
+                <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Amount
                 </th>
                 <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -577,6 +606,9 @@ const OnlineSaleForm = () => {
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-900">
                       {entry.products.join(", ")}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 capitalize">
+                      {entry.paymentType}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       ₹{Number(entry.totalAmount).toFixed(2)}
