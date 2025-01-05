@@ -17,10 +17,25 @@ const inventorySchema = new mongoose.Schema({
     required: [true, "Selling rate is required"],
     min: [0, "Selling rate cannot be negative"],
   },
+  regularBulkRate: {
+    type: Number,
+    required: [true, "Regular bulk buyer rate is required"],
+    min: [0, "Rate cannot be negative"],
+  },
+  bulkQuantityRate: {
+    type: Number,
+    required: [true, "Bulk quantity rate is required"],
+    min: [0, "Rate cannot be negative"],
+  },
   quantity: {
     type: Number,
     required: [true, "Quantity is required"],
     min: [1, "Quantity must be at least 1"],
+  },
+  category: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "ProductCategory", // Ensure the model name matches the exported name
+    required: [true, "Product category is required"],
   },
   createdAt: {
     type: Date,
@@ -30,5 +45,4 @@ const inventorySchema = new mongoose.Schema({
 
 const Inventory =
   mongoose.models.Inventory || mongoose.model("Inventory", inventorySchema);
-
 export default Inventory;

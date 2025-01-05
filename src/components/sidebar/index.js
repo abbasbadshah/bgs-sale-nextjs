@@ -1,8 +1,6 @@
-"use client";
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import Image from "next/image";
 import {
   FaRegUserCircle,
   FaUsers,
@@ -47,6 +45,36 @@ const MenuLink = ({ item, currentPath }) => {
       <Icon className={`w-5 h-5 ${isActive ? "text-primary" : "text-white"}`} />
       <span className="mx-4 font-medium">{item.name}</span>
     </Link>
+  );
+};
+
+const UserAvatar = ({ username }) => {
+  const getInitial = (name) => {
+    return name ? name.charAt(0).toUpperCase() : "U";
+  };
+
+  // Generate a consistent color based on username
+  const getAvatarColor = (name) => {
+    const colors = [
+      "bg-blue-500",
+      "bg-green-500",
+      "bg-yellow-500",
+      "bg-purple-500",
+      "bg-pink-500",
+      "bg-indigo-500",
+    ];
+    const index = name ? name.length % colors.length : 0;
+    return colors[index];
+  };
+
+  return (
+    <div
+      className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg text-white ${getAvatarColor(
+        username
+      )} transition-transform hover:scale-105 cursor-pointer shadow-lg`}
+    >
+      {getInitial(username)}
+    </div>
   );
 };
 
@@ -136,7 +164,7 @@ const Sidebar = ({ onClose, isOpen }) => {
       {/* Sidebar */}
       <aside
         ref={sidebarRef}
-        className={`fixed lg:relative z-50 w-64 h-screen bg-primary transition-transform duration-300 ease-in-out ${
+        className={`fixed lg:relative z-50 w-fit h-screen bg-primary transition-transform duration-300 ease-in-out ${
           isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }`}
       >
@@ -187,7 +215,7 @@ const Sidebar = ({ onClose, isOpen }) => {
               <hr className="my-6 border-gray-600" />
               <div className="px-4 space-y-3">
                 <div className="flex items-center space-x-3">
-                  <FaRegUserCircle className="w-10 h-10 text-white" />
+                  <UserAvatar username={userData?.username} />
                   <div className="flex flex-col">
                     <span className="font-medium text-gray-200">
                       {userData?.username || "User"}
@@ -199,7 +227,7 @@ const Sidebar = ({ onClose, isOpen }) => {
                 </div>
                 <button
                   onClick={handleLogout}
-                  className="flex items-center w-full px-4 py-2 text-sm font-medium text-gray-200 transition-colors duration-300 transform rounded-md hover:bg-gray-800"
+                  className="flex items-center justify-center text-center w-full px-4 py-2 text-sm font-medium bg-red-500 text-white transition-colors duration-300 transform rounded-md hover:bg-white hover:text-black"
                 >
                   <MdLogout className="w-5 h-5 mr-2" />
                   Logout
