@@ -1,3 +1,4 @@
+// app/api/auth/register/route.js
 import { connectDB } from "@/utils/db";
 import { User } from "@/models/user";
 import bcrypt from "bcryptjs";
@@ -5,13 +6,24 @@ import { NextResponse } from "next/server";
 
 export async function POST(req) {
   try {
-    const { email, password, confirmPassword, role } = await req.json();
+    const { email, username, password, confirmPassword, role } = await req.json();
 
     await connectDB();
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
+    
+    // Check for existing email
+    const existingEmail = await User.findOne({ email });
+    if (existingEmail) {
       return NextResponse.json(
-        { message: "User already exists" },
+        { message: "Email already exists" },
+        { status: 400 }
+      );
+    }
+
+    // Check for existing username
+    const existingUsername = await User.findOne({ username });
+    if (existingUsername) {
+      return NextResponse.json(
+        { message: "Username already exists" },
         { status: 400 }
       );
     }
@@ -20,6 +32,7 @@ export async function POST(req) {
 
     const user = await User.create({
       email,
+      username,
       password: hashedPassword,
       confirmPassword: confirmPassword,
       role: role || "user",
@@ -27,6 +40,7 @@ export async function POST(req) {
 
     const userWithoutPassword = {
       email: user.email,
+      username: user.username,
       _id: user._id,
       role: user.role,
       confirmPassword: user.confirmPassword,

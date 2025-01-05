@@ -24,6 +24,7 @@ export async function GET() {
       user: {
         id: decoded.userId,
         email: decoded.email,
+        username: decoded.username,
         role: decoded.role,
       },
     });

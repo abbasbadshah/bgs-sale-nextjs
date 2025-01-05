@@ -1,26 +1,35 @@
+"use client";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import Sidebar from "@/components/sidebar";
 
 export default function DashboardLayout({ children }) {
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
-      {/* Header */}
-      <Header className="z-10" />
+    <div className="flex flex-col h-screen">
+      {/* Fixed Header */}
+      <div className="flex-shrink-0">
+        <Header />
+      </div>
 
-      {/* Main content area with sidebar */}
+      {/* Main Content Area */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Sidebar */}
-        <Sidebar className="w-64 flex-shrink-0 bg-white shadow-sm" />
+        {/* Fixed Sidebar */}
+        <div className="flex-shrink-0 w-64">
+          <Sidebar />
+        </div>
 
-        {/* Main content with footer */}
-        <main className="flex-1 flex flex-col overflow-y-auto">
-          {/* Content area that grows to push footer down */}
-          <div className="flex-1 p-6">{children}</div>
+        {/* Main Content with Footer */}
+        <div className="flex flex-col flex-1 p-6">
+          {/* Scrollable Content Area */}
+          <main className="flex-1 overflow-y-auto">
+            <div className="bg-black rounded h-full">{children}</div>
+          </main>
 
-          {/* Footer fixed at bottom of main content */}
-          <Footer className="mt-auto bg-white shadow-sm" />
-        </main>
+          {/* Fixed Footer */}
+          <div className="flex-shrink-0">
+            <Footer className="mt-5" />
+          </div>
+        </div>
       </div>
     </div>
   );

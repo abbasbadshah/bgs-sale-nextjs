@@ -1,3 +1,4 @@
+// app/auth/register/page.js
 "use client";
 import { useForm } from "react-hook-form";
 
@@ -31,6 +32,7 @@ export default function Register() {
         },
         body: JSON.stringify({
           email: data.email,
+          username: data.username,
           password: data.password,
           confirmPassword: data.confirmPassword,
           role: data.role,
@@ -85,6 +87,31 @@ export default function Register() {
                 {errors.email && (
                   <p className="text-red-500 text-sm mt-1">
                     {errors.email.message}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label
+                  htmlFor="username"
+                  className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                >
+                  Username
+                </label>
+                <input
+                  type="text"
+                  {...register("username", {
+                    required: "Username is required",
+                    minLength: {
+                      value: 3,
+                      message: "Username must be at least 3 characters",
+                    },
+                  })}
+                  className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+                />
+                {errors.username && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.username.message}
                   </p>
                 )}
               </div>

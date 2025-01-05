@@ -1,6 +1,7 @@
 "use client";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
+import DashboardLayout from "@/components/layout";
 
 const AddInventory = () => {
   const [error, setError] = useState("");
@@ -40,28 +41,28 @@ const AddInventory = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-2xl mx-auto">
-        <div className="bg-white shadow-lg rounded-lg px-8 py-6">
-          <h2 className="text-2xl font-bold text-gray-900 text-center mb-8">
-            Add New Inventory Item
-          </h2>
+    <DashboardLayout>
+      <div className="py-8 px-4 sm:px-6 lg:px-8 rounded">
+        <h2 className="text-2xl font-bold text-white text-center mb-8">
+          Add New Inventory Item
+        </h2>
 
-          {error && (
-            <div className="mb-4 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md">
-              {error}
-            </div>
-          )}
+        {error && (
+          <div className="mb-4 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md">
+            {error}
+          </div>
+        )}
 
-          {success && (
-            <div className="mb-4 bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-md">
-              {success}
-            </div>
-          )}
+        {success && (
+          <div className="mb-4 bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-md">
+            {success}
+          </div>
+        )}
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <div className="grid grid-cols-4 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-white mb-2">
                 Product Name
               </label>
               <input
@@ -77,9 +78,8 @@ const AddInventory = () => {
                 </p>
               )}
             </div>
-
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-white mb-2">
                 Purchase Rate
               </label>
               <input
@@ -98,9 +98,8 @@ const AddInventory = () => {
                 </p>
               )}
             </div>
-
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-white mb-2">
                 Selling Rate
               </label>
               <input
@@ -122,9 +121,8 @@ const AddInventory = () => {
                 </p>
               )}
             </div>
-
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-white mb-2">
                 Quantity
               </label>
               <input
@@ -142,17 +140,16 @@ const AddInventory = () => {
                 </p>
               )}
             </div>
-
-            <button
-              type="submit"
-              className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200"
-            >
-              Add Product
-            </button>
-          </form>
-        </div>
+          </div>
+          <button
+            type="submit"
+            className="w-fit bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200"
+          >
+            Add Product
+          </button>
+        </form>
       </div>
-    </div>
+    </DashboardLayout>
   );
 };
 

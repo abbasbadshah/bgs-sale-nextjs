@@ -1,3 +1,4 @@
+// app/api/auth/login/route.js
 import { connectDB } from "@/utils/db";
 import { User } from "@/models/user";
 import bcrypt from "bcryptjs";
@@ -10,21 +11,25 @@ const JWT_SECRET = "your_super_secret_key_123!@#$%^&*()_+";
 export async function POST(req) {
   try {
     const body = await req.json();
-    const { email, password } = body;
+    const { login, password } = body; // 'login' can be either email or username
 
-    if (!email || !password) {
+    if (!login || !password) {
       return NextResponse.json(
-        { message: "Email and password are required" },
+        { message: "Login credentials and password are required" },
         { status: 400 }
       );
     }
 
     await connectDB();
 
-    const user = await User.findOne({ email }).select("+password");
+    // Try to find user by email or username
+    const user = await User.findOne({
+      $or: [{ email: login }, { username: login }],
+    }).select("+password");
+
     if (!user) {
       return NextResponse.json(
-        { message: "Invalid email or password" },
+        { message: "Invalid credentials" },
         { status: 401 }
       );
     }
@@ -32,7 +37,7 @@ export async function POST(req) {
     const isValid = await bcrypt.compare(password, user.password);
     if (!isValid) {
       return NextResponse.json(
-        { message: "Invalid email or password" },
+        { message: "Invalid credentials" },
         { status: 401 }
       );
     }
@@ -41,7 +46,8 @@ export async function POST(req) {
       {
         userId: user._id,
         email: user.email,
-        role: user.role, // Include role in JWT
+        username: user.username,
+        role: user.role,
       },
       JWT_SECRET,
       { expiresIn: "1d" }
@@ -63,8 +69,9 @@ export async function POST(req) {
         message: "Login successful",
         user: {
           email: user.email,
+          username: user.username,
           id: user._id,
-          role: user.role, // Include role in response
+          role: user.role,
         },
       },
       { status: 200 }

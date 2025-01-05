@@ -1,3 +1,4 @@
+// models/user.js
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
@@ -8,6 +9,12 @@ const userSchema = new mongoose.Schema(
       unique: true,
       trim: true,
       lowercase: true,
+    },
+    username: {
+      type: String,
+      required: [true, "Username is required"],
+      unique: true,
+      trim: true,
     },
     password: {
       type: String,

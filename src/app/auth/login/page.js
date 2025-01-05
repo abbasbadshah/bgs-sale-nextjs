@@ -1,3 +1,4 @@
+// app/auth/login/page.js
 "use client";
 import { useForm } from "react-hook-form";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -20,7 +21,10 @@ export default function Login() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          login: data.login, // This can be either email or username
+          password: data.password,
+        }),
       });
 
       const result = await res.json();
@@ -55,25 +59,22 @@ export default function Login() {
             >
               <div>
                 <label
-                  htmlFor="email"
+                  htmlFor="login"
                   className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                 >
-                  Email
+                  Email or Username
                 </label>
                 <input
-                  type="email"
-                  {...register("email", {
-                    required: "Email is required",
-                    pattern: {
-                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                      message: "Invalid email address",
-                    },
+                  type="text"
+                  // app/auth/login/page.js (continued)
+                  {...register("login", {
+                    required: "Email or username is required",
                   })}
                   className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
                 />
-                {errors.email && (
+                {errors.login && (
                   <p className="text-red-500 text-sm mt-1">
-                    {errors.email.message}
+                    {errors.login.message}
                   </p>
                 )}
               </div>
