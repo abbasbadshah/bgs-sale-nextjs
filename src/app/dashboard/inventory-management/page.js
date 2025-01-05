@@ -2,17 +2,13 @@
 import { useForm } from "react-hook-form";
 import { useState } from "react";
 import DashboardLayout from "@/components/layout";
+import Input from "@/components/ui/input";
+import Button from "@/components/ui/button";
 
 const AddInventory = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm();
+  const { control, handleSubmit, reset } = useForm();
 
   const onSubmit = async (data) => {
     try {
@@ -41,12 +37,11 @@ const AddInventory = () => {
   };
 
   return (
-    <DashboardLayout>
-      <div className="py-8 px-4 sm:px-6 lg:px-8 rounded">
-        <h2 className="text-2xl font-bold text-white text-center mb-8">
-          Add New Inventory Item
-        </h2>
-
+    <DashboardLayout
+      pageTitle="Add New Inventory Item"
+      pageHeading="Add New Inventory Item"
+    >
+      <section className="w-full bg-primary h-full lg:h-[100vh] lg:overflow-y-scroll rounded-md p-6 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded-md">
         {error && (
           <div className="mb-4 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md">
             {error}
@@ -61,94 +56,51 @@ const AddInventory = () => {
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div className="grid grid-cols-4 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-white mb-2">
-                Product Name
-              </label>
-              <input
-                {...register("productName", {
-                  required: "Product name is required",
-                })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-                placeholder="Enter product name"
-              />
-              {errors.productName && (
-                <p className="mt-1 text-sm text-red-600">
-                  {errors.productName.message}
-                </p>
-              )}
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-white mb-2">
-                Purchase Rate
-              </label>
-              <input
-                type="number"
-                step="0.01"
-                {...register("rate", {
-                  required: "Purchase rate is required",
-                  min: { value: 0, message: "Rate must be greater than 0" },
-                })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-                placeholder="Enter purchase rate"
-              />
-              {errors.rate && (
-                <p className="mt-1 text-sm text-red-600">
-                  {errors.rate.message}
-                </p>
-              )}
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-white mb-2">
-                Selling Rate
-              </label>
-              <input
-                type="number"
-                step="0.01"
-                {...register("salingRate", {
-                  required: "Selling rate is required",
-                  min: {
-                    value: 0,
-                    message: "Selling rate must be greater than 0",
-                  },
-                })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-                placeholder="Enter selling rate"
-              />
-              {errors.salingRate && (
-                <p className="mt-1 text-sm text-red-600">
-                  {errors.salingRate.message}
-                </p>
-              )}
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-white mb-2">
-                Quantity
-              </label>
-              <input
-                type="number"
-                {...register("quantity", {
-                  required: "Quantity is required",
-                  min: { value: 1, message: "Quantity must be at least 1" },
-                })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-                placeholder="Enter quantity"
-              />
-              {errors.quantity && (
-                <p className="mt-1 text-sm text-red-600">
-                  {errors.quantity.message}
-                </p>
-              )}
-            </div>
+            <Input
+              control={control}
+              name={"productName"}
+              placeholder={"Enter productName Name"}
+              required
+              type="text"
+              label={"productName Name"}
+              autoComplete={"productName"}
+            />
+            <Input
+              control={control}
+              name={"rate"}
+              placeholder={"Enter Purchase rate"}
+              required
+              type="number"
+              label={"Purchase Rate"}
+              autoComplete={"rate"}
+            />
+            <Input
+              control={control}
+              name={"salingRate"}
+              placeholder={"Enter Purchase salingRate"}
+              required
+              type="number"
+              label={"Purchase Saling Rate"}
+              autoComplete={"salingRate"}
+            />
+            <Input
+              control={control}
+              name={"quantity"}
+              placeholder={"Enter Quantity"}
+              required
+              type="number"
+              label={"Enter Quantity"}
+              autoComplete={"quantity"}
+            />
           </div>
-          <button
+          <Button
             type="submit"
-            className="w-fit bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200"
+            className={"flex justify-center items-center gap-3"}
           >
             Add Product
-          </button>
+          </Button>
         </form>
-      </div>
+      </section>
     </DashboardLayout>
   );
 };

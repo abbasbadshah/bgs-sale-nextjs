@@ -1,272 +1,12 @@
+// pages/sales/index.js
 "use client";
-import { useForm } from "react-hook-form";
 import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
 import DashboardLayout from "@/components/layout";
-import {
-  Document,
-  Page,
-  Text,
-  View,
-  StyleSheet,
-  PDFDownloadLink,
-} from "@react-pdf/renderer";
+import { SalesTable } from "./components/sales-report/SalesTable";
+import Input from "@/components/ui/input";
+import Button from "@/components/ui/button";
 
-// PDF styles
-const styles = StyleSheet.create({
-  page: {
-    padding: 30,
-  },
-  header: {
-    marginBottom: 20,
-    textAlign: "center",
-  },
-  shopName: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 10,
-  },
-  title: {
-    fontSize: 16,
-    marginBottom: 5,
-  },
-  subtitle: {
-    fontSize: 12,
-    marginBottom: 20,
-  },
-  table: {
-    display: "table",
-    width: "100%",
-    marginBottom: 30,
-    borderStyle: "solid",
-    borderWidth: 1,
-    borderColor: "#bfbfbf",
-  },
-  tableRow: {
-    flexDirection: "row",
-    borderBottomWidth: 1,
-    borderBottomColor: "#bfbfbf",
-  },
-  tableHeader: {
-    backgroundColor: "#f0f0f0",
-  },
-  tableCell: {
-    padding: 8,
-    fontSize: 10,
-    textAlign: "left",
-  },
-  col1: { width: "25%" },
-  col2: { width: "35%" },
-  col3: { width: "20%" },
-  col4: { width: "20%" },
-  signature: {
-    marginTop: 50,
-    textAlign: "right",
-  },
-  totalRow: {
-    marginTop: 10,
-    flexDirection: "row",
-    justifyContent: "flex-end",
-  },
-  totalLabel: {
-    fontSize: 12,
-    fontWeight: "bold",
-    marginRight: 10,
-  },
-  totalAmount: {
-    fontSize: 12,
-    fontWeight: "bold",
-  },
-});
-
-// PDF Document Component
-const SalesReport = ({ data, period }) => {
-  const totalAmount = data.reduce(
-    (sum, entry) => sum + Number(entry.totalAmount),
-    0
-  );
-
-  return (
-    <Document>
-      <Page size="A4" style={styles.page}>
-        <View style={styles.header}>
-          <Text style={styles.shopName}>
-            Badshah General Store Masakin Branch
-          </Text>
-          <Text style={styles.title}>Daily Sales Report</Text>
-          <Text style={styles.subtitle}>Period: {period}</Text>
-          <Text style={styles.subtitle}>
-            Date: {new Date().toLocaleDateString()}
-          </Text>
-        </View>
-
-        <View style={styles.table}>
-          <View style={[styles.tableRow, styles.tableHeader]}>
-            <Text style={[styles.tableCell, { width: "20%" }]}>Date</Text>
-            <Text style={[styles.tableCell, { width: "30%" }]}>Products</Text>
-            <Text style={[styles.tableCell, { width: "15%" }]}>Payment</Text>
-            <Text style={[styles.tableCell, { width: "15%" }]}>Amount</Text>
-            <Text style={[styles.tableCell, { width: "20%" }]}>Created At</Text>
-          </View>
-
-          {data.map((entry, index) => (
-            <View key={index} style={styles.tableRow}>
-              <Text style={[styles.tableCell, { width: "20%" }]}>
-                {new Date(entry.date).toLocaleDateString()}
-              </Text>
-              <Text style={[styles.tableCell, { width: "30%" }]}>
-                {entry.products.join(", ")}
-              </Text>
-              <Text style={[styles.tableCell, { width: "15%" }]}>
-                {entry.paymentType}
-              </Text>
-              <Text style={[styles.tableCell, { width: "15%" }]}>
-                Rs. {Number(entry.totalAmount).toFixed(2)}
-              </Text>
-              <Text style={[styles.tableCell, { width: "20%" }]}>
-                {new Date(entry.createdAt).toLocaleString()}
-              </Text>
-            </View>
-          ))}
-        </View>
-
-        <View style={styles.totalRow}>
-          <Text style={styles.totalLabel}>Total Amount:</Text>
-          <Text style={styles.totalAmount}>Rs. {totalAmount.toFixed(2)}</Text>
-        </View>
-
-        <View style={styles.signature}>
-          <Text>Authorized Signature</Text>
-          <Text>_________________</Text>
-        </View>
-      </Page>
-    </Document>
-  );
-};
-
-const PrintButton = ({
-  showPrintOptions,
-  setShowPrintOptions,
-  getFilteredSales,
-  getPeriodLabel,
-}) => (
-  <div className="relative">
-    <button
-      onClick={() => setShowPrintOptions(!showPrintOptions)}
-      className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors duration-200"
-    >
-      Print Report
-    </button>
-    {showPrintOptions && (
-      <div className="fixed right-4 mt-2 w-48 bg-white rounded-md shadow-lg z-50 border border-gray-200">
-        <div className="py-1">
-          {["today", "week", "month", "3months", "6months", "year"].map(
-            (period) => (
-              <PDFDownloadLink
-                key={period}
-                document={
-                  <SalesReport
-                    data={getFilteredSales()}
-                    period={getPeriodLabel(period)}
-                  />
-                }
-                fileName={`sales_report_${period}_${
-                  new Date().toISOString().split("T")[0]
-                }.pdf`}
-                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-              >
-                {({ loading }) =>
-                  loading ? "Loading..." : getPeriodLabel(period)
-                }
-              </PDFDownloadLink>
-            )
-          )}
-        </div>
-      </div>
-    )}
-  </div>
-);
-
-const ShareButton = ({ getFilteredSales, dateFilter, getPeriodLabel }) => {
-  const [isSharing, setIsSharing] = useState(false);
-
-  const generatePDFAndShare = async () => {
-    setIsSharing(true);
-    try {
-      // Generate PDF blob
-      const pdfDoc = (
-        <SalesReport
-          data={getFilteredSales()}
-          period={getPeriodLabel(dateFilter)}
-        />
-      );
-      const blob = await pdf(pdfDoc).toBlob();
-
-      // Convert blob to base64
-      const reader = new FileReader();
-      reader.readAsDataURL(blob);
-      reader.onloadend = async () => {
-        const base64data = reader.result;
-
-        // Generate WhatsApp message
-        const filteredData = getFilteredSales();
-        const totalAmount = filteredData.reduce(
-          (sum, entry) => sum + Number(entry.totalAmount),
-          0
-        );
-
-        const message =
-          `*Badshah General Store Masakin Branch - Sales Report*%0a%0a` +
-          `Period: ${getPeriodLabel(dateFilter)}%0a` +
-          `Total Sales: Rs. ${totalAmount.toFixed(2)}%0a` +
-          `Number of Transactions: ${filteredData.length}%0a%0a` +
-          `Generated on: ${new Date().toLocaleString()}`;
-
-        // Send to backend API
-        const response = await fetch("/api/share-report", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            message,
-            pdfData: base64data,
-            phoneNumber: "919926051954",
-            fileName: `sales_report_${dateFilter}_${
-              new Date().toISOString().split("T")[0]
-            }.pdf`,
-          }),
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to share report");
-        }
-
-        const result = await response.json();
-        if (result.success) {
-          // Open WhatsApp with the pre-filled message
-          window.open(result.whatsappUrl, "_blank");
-        } else {
-          throw new Error(result.message || "Failed to share report");
-        }
-      };
-    } catch (error) {
-      console.error("Error sharing report:", error);
-      alert("Failed to share report. Please try again.");
-    } finally {
-      setIsSharing(false);
-    }
-  };
-
-  return (
-    <button
-      onClick={generatePDFAndShare}
-      disabled={isSharing}
-      className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 disabled:opacity-50"
-    >
-      {isSharing ? "Sending..." : "Send Report to Owner"}
-    </button>
-  );
-};
 const OnlineSaleForm = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -275,13 +15,7 @@ const OnlineSaleForm = () => {
   const [isTableLoading, setIsTableLoading] = useState(true);
   const [dateFilter, setDateFilter] = useState("today");
   const [showPrintOptions, setShowPrintOptions] = useState(false);
-
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm();
+  const { control, handleSubmit, reset } = useForm();
 
   const fetchSales = async () => {
     setIsTableLoading(true);
@@ -401,237 +135,81 @@ const OnlineSaleForm = () => {
     }
   };
 
-  const PrintButton = () => (
-    <div className="relative">
-      <button
-        onClick={() => setShowPrintOptions(!showPrintOptions)}
-        className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors duration-200"
-      >
-        Print Report
-      </button>
-      {showPrintOptions && (
-        <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border border-gray-200">
-          <div className="py-1">
-            {["today", "week", "month", "3months", "6months", "year"].map(
-              (period) => (
-                <PDFDownloadLink
-                  key={period}
-                  document={
-                    <SalesReport
-                      data={getFilteredSales()}
-                      period={getPeriodLabel(period)}
-                    />
-                  }
-                  fileName={`sales_report_${period}_${
-                    new Date().toISOString().split("T")[0]
-                  }.pdf`}
-                  className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                >
-                  {({ loading }) =>
-                    loading ? "Loading..." : getPeriodLabel(period)
-                  }
-                </PDFDownloadLink>
-              )
-            )}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-
   return (
-    <DashboardLayout>
-      <div className="space-y-8">
-        {/* Form Section */}
-        <div className="bg-white shadow-lg rounded-lg px-8 py-6">
-          <h2 className="text-2xl font-bold text-gray-900 text-center mb-8">
-            Record Daily Sale
-          </h2>
-
-          {error && (
-            <div className="mb-4 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md">
-              {error}
-            </div>
-          )}
-
-          {success && (
-            <div className="mb-4 bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-md">
-              {success}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Product Names (Comma Separated)
-              </label>
-              <textarea
-                {...register("products", {
-                  required: "Products are required",
-                  validate: (value) =>
-                    value.trim() !== "" || "Products cannot be empty",
-                })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-                placeholder="e.g., Product 1, Product 2, Product 3"
-                rows={3}
-              />
-              {errors.products && (
-                <p className="mt-1 text-sm text-red-600">
-                  {errors.products.message}
-                </p>
-              )}
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Payment Type
-                </label>
-                <select
-                  {...register("paymentType", {
-                    required: "Payment type is required",
-                  })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-                >
-                  <option value="">Select payment type</option>
-                  <option value="cash">Cash</option>
-                  <option value="online">Online</option>
-                </select>
-                {errors.paymentType && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {errors.paymentType.message}
-                  </p>
-                )}
+    <DashboardLayout pageHeading={"Daily Sales"}>
+      <section className="w-full bg-primary h-full lg:h-[100vh] lg:overflow-y-scroll rounded-md p-6 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded-md">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div>
+            {error && (
+              <div className="mb-4 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md">
+                {error}
               </div>
+            )}
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Total Amount
-                </label>
-                <input
-                  type="number"
-                  step="0.01"
-                  {...register("totalAmount", {
-                    required: "Total amount is required",
-                    min: {
-                      value: 0.01,
-                      message: "Amount must be greater than 0",
-                    },
-                  })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-                  placeholder="Enter total amount"
+            {success && (
+              <div className="mb-4 bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-md">
+                {success}
+              </div>
+            )}
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+              <div className="">
+                <Input
+                  type="textarea"
+                  name="products"
+                  label="Enter Products"
+                  placeholder={"Use Comma to add multiple products"}
+                  control={control}
+                  rows={5}
+                  maxRows={8}
+                  minRows={2}
                 />
-                {errors.totalAmount && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {errors.totalAmount.message}
-                  </p>
-                )}
+                <div className="grid grid-cols-2 gap-4">
+                  <Input
+                    type="select"
+                    name="paymentType"
+                    label="Payment Type"
+                    control={control}
+                    required
+                    options={[
+                      { value: "cash", label: "Cash" },
+                      { value: "online", label: "online" },
+                    ]}
+                    placeholder="Choose Payment Type"
+                    dark={true}
+                  />
+                  <Input
+                    control={control}
+                    name={"totalAmount"}
+                    placeholder={"Total Amount"}
+                    required
+                    type="text"
+                    label={"Enter Total Amount"}
+                    dark={false}
+                    autoComplete={"totalAmount"}
+                  />
+                </div>
               </div>
-            </div>
 
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-fit bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 disabled:opacity-50"
-            >
-              {isLoading ? "Recording..." : "Record Sale"}
-            </button>
-          </form>
-        </div>
-
-        {/* Table Section */}
-        <div className="bg-white shadow-lg rounded-lg px-8 py-6 overflow-x-auto">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-xl font-bold text-gray-900">Sales Entries</h3>
-            <div className="flex gap-4 items-center">
-              <select
-                value={dateFilter}
-                onChange={(e) => setDateFilter(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className={"transition-colors duration-200 disabled:opacity-50"}
               >
-                <option value="today">Today</option>
-                <option value="week">This Week</option>
-                <option value="month">This Month</option>
-                <option value="3months">Past 3 Months</option>
-                <option value="6months">Past 6 Months</option>
-                <option value="year">This Year</option>
-              </select>
-              <PrintButton
-                showPrintOptions={showPrintOptions}
-                setShowPrintOptions={setShowPrintOptions}
-                getFilteredSales={getFilteredSales}
-                getPeriodLabel={getPeriodLabel}
-              />
-              <ShareButton
-                getFilteredSales={getFilteredSales}
-                dateFilter={dateFilter}
-                getPeriodLabel={getPeriodLabel} // Add this line
-              />
-            </div>
+                {isLoading ? "Recording..." : "Record Sale"}
+              </Button>
+            </form>
           </div>
-
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead>
-              <tr>
-                <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Date
-                </th>
-                <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Products
-                </th>
-                <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Payment Type
-                </th>
-                <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Amount
-                </th>
-                <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Created At
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {isTableLoading ? (
-                <tr>
-                  <td colSpan={4} className="px-6 py-4 text-center">
-                    <div className="flex justify-center">
-                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-                    </div>
-                  </td>
-                </tr>
-              ) : getFilteredSales().length > 0 ? (
-                getFilteredSales().map((entry) => (
-                  <tr key={entry._id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {new Date(entry.date).toLocaleDateString()}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-900">
-                      {entry.products.join(", ")}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 capitalize">
-                      {entry.paymentType}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      ₹{Number(entry.totalAmount).toFixed(2)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {new Date(entry.createdAt).toLocaleString()}
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td
-                    colSpan={4}
-                    className="px-6 py-4 text-sm text-gray-500 text-center"
-                  >
-                    No entries found
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+          <SalesTable
+            isTableLoading={isTableLoading}
+            getFilteredSales={getFilteredSales}
+            dateFilter={dateFilter}
+            setDateFilter={setDateFilter}
+            showPrintOptions={showPrintOptions}
+            setShowPrintOptions={setShowPrintOptions}
+            getPeriodLabel={getPeriodLabel}
+          />
         </div>
-      </div>
+      </section>
     </DashboardLayout>
   );
 };
