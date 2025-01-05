@@ -1,10 +1,11 @@
-// app/auth/login/page.js
 "use client";
+
 import { useForm } from "react-hook-form";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
+import { Suspense } from "react";
 
-export default function Login() {
+function LoginComponent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [error, setError] = useState("");
@@ -22,7 +23,7 @@ export default function Login() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          login: data.login, // This can be either email or username
+          login: data.login,
           password: data.password,
         }),
       });
@@ -66,7 +67,6 @@ export default function Login() {
                 </label>
                 <input
                   type="text"
-                  // app/auth/login/page.js (continued)
                   {...register("login", {
                     required: "Email or username is required",
                   })}
@@ -121,5 +121,13 @@ export default function Login() {
         </div>
       </div>
     </section>
+  );
+}
+
+export default function Login() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LoginComponent />
+    </Suspense>
   );
 }
