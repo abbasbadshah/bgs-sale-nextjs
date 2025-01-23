@@ -6,6 +6,7 @@ import DashboardLayout from "@/components/layout";
 import { SalesTable } from "./components/sales-report/SalesTable";
 import Input from "@/components/ui/input";
 import Button from "@/components/ui/button";
+import TotalSalesCard from "./components/sales-report/SaleAmount";
 
 const OnlineSaleForm = () => {
   const [error, setError] = useState("");
@@ -20,7 +21,18 @@ const OnlineSaleForm = () => {
   const fetchSales = async () => {
     setIsTableLoading(true);
     try {
-      const response = await fetch("/api/daily-sales");
+      let url = "/api/daily-sales";
+      const params = new URLSearchParams();
+
+      if (dateFilter === "yesterday") {
+        params.append("yesterday", "true");
+      }
+
+      if (params.toString()) {
+        url += `?${params.toString()}`;
+      }
+
+      const response = await fetch(url);
       const result = await response.json();
 
       if (result.success && Array.isArray(result.data)) {
@@ -50,6 +62,14 @@ const OnlineSaleForm = () => {
       switch (dateFilter) {
         case "today":
           return entryDate >= startOfDay;
+        case "yesterday":
+          const yesterdayStart = new Date(now);
+          yesterdayStart.setDate(yesterdayStart.getDate() - 1);
+          yesterdayStart.setHours(0, 0, 0, 0);
+          const yesterdayEnd = new Date(now);
+          yesterdayEnd.setDate(yesterdayEnd.getDate() - 1);
+          yesterdayEnd.setHours(23, 59, 59, 999);
+          return entryDate >= yesterdayStart && entryDate <= yesterdayEnd;
         case "week":
           const lastWeek = new Date(now);
           lastWeek.setDate(lastWeek.getDate() - 7);
@@ -80,6 +100,8 @@ const OnlineSaleForm = () => {
     switch (period) {
       case "today":
         return "Today's Report";
+      case "yesterday":
+        return "Yesterday's Report";
       case "week":
         return "This Week's Report";
       case "month":
@@ -139,65 +161,72 @@ const OnlineSaleForm = () => {
     <DashboardLayout pageHeading={"Daily Sales"}>
       <section className="w-full bg-primary h-full lg:h-[100vh] lg:overflow-y-scroll rounded-md p-6 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded-md">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div>
-            {error && (
-              <div className="mb-4 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md">
-                {error}
-              </div>
-            )}
-
-            {success && (
-              <div className="mb-4 bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-md">
-                {success}
-              </div>
-            )}
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-              <div className="">
-                <Input
-                  type="textarea"
-                  name="products"
-                  label="Enter Products"
-                  placeholder={"Use Comma to add multiple products"}
-                  control={control}
-                  rows={5}
-                  maxRows={8}
-                  minRows={2}
-                />
-                <div className="grid grid-cols-2 gap-4">
-                  <Input
-                    type="select"
-                    name="paymentType"
-                    label="Payment Type"
-                    control={control}
-                    required
-                    options={[
-                      { value: "cash", label: "Cash" },
-                      { value: "online", label: "online" },
-                    ]}
-                    placeholder="Choose Payment Type"
-                    dark={true}
-                  />
-                  <Input
-                    control={control}
-                    name={"totalAmount"}
-                    placeholder={"Total Amount"}
-                    required
-                    type="text"
-                    label={"Enter Total Amount"}
-                    dark={false}
-                    autoComplete={"totalAmount"}
-                  />
+          <div className="grid grid-cols-1 gap-4">
+            <div>
+              {error && (
+                <div className="mb-4 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md">
+                  {error}
                 </div>
-              </div>
+              )}
 
-              <Button
-                type="submit"
-                disabled={isLoading}
-                className={"transition-colors duration-200 disabled:opacity-50"}
-              >
-                {isLoading ? "Recording..." : "Record Sale"}
-              </Button>
-            </form>
+              {success && (
+                <div className="mb-4 bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-md">
+                  {success}
+                </div>
+              )}
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                <div className="">
+                  <Input
+                    type="textarea"
+                    name="products"
+                    label="Enter Products"
+                    placeholder={"Use Comma to add multiple products"}
+                    control={control}
+                    rows={5}
+                    maxRows={8}
+                    minRows={2}
+                  />
+                  <div className="grid grid-cols-2 gap-4">
+                    <Input
+                      type="select"
+                      name="paymentType"
+                      label="Payment Type"
+                      control={control}
+                      required
+                      options={[
+                        { value: "cash", label: "Cash" },
+                        { value: "online", label: "online" },
+                      ]}
+                      placeholder="Choose Payment Type"
+                      dark={true}
+                    />
+                    <Input
+                      control={control}
+                      name={"totalAmount"}
+                      placeholder={"Total Amount"}
+                      required
+                      type="text"
+                      label={"Enter Total Amount"}
+                      autoComplete={"totalAmount"}
+                    />
+                  </div>
+                </div>
+
+                <Button
+                  type="submit"
+                  disabled={isLoading}
+                  className={
+                    "transition-colors duration-200 disabled:opacity-50"
+                  }
+                >
+                  {isLoading ? "Recording..." : "Record Sale"}
+                </Button>
+              </form>
+            </div>
+            <TotalSalesCard
+              salesEntries={salesEntries}
+              dateFilter={dateFilter}
+            />
           </div>
           <SalesTable
             isTableLoading={isTableLoading}

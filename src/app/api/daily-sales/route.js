@@ -3,10 +3,46 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/utils/db";
 import DailySale from "@/models/daily-sale";
 
-export async function GET() {
+export async function GET(request) {
   try {
     await connectDB();
-    const sales = await DailySale.find({}).sort({ date: -1 });
+    const { searchParams } = new URL(request.url);
+    const yesterday = searchParams.get("yesterday");
+    const minAmount = searchParams.get("minAmount");
+    const maxAmount = searchParams.get("maxAmount");
+
+    let query = {};
+
+    // Yesterday filter
+    if (yesterday === "true") {
+      const yesterdayStart = new Date();
+      yesterdayStart.setDate(yesterdayStart.getDate() - 1);
+      yesterdayStart.setHours(0, 0, 0, 0);
+
+      const yesterdayEnd = new Date();
+      yesterdayEnd.setDate(yesterdayEnd.getDate() - 1);
+      yesterdayEnd.setHours(23, 59, 59, 999);
+
+      query.date = {
+        $gte: yesterdayStart,
+        $lte: yesterdayEnd,
+      };
+    }
+
+    // Amount range filter
+    if (minAmount || maxAmount) {
+      query.totalAmount = {};
+
+      if (minAmount) {
+        query.totalAmount.$gte = parseFloat(minAmount);
+      }
+
+      if (maxAmount) {
+        query.totalAmount.$lte = parseFloat(maxAmount);
+      }
+    }
+
+    const sales = await DailySale.find(query).sort({ date: -1 });
 
     return NextResponse.json({
       success: true,

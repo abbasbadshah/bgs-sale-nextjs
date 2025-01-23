@@ -1,5 +1,6 @@
 import { PrintButton } from "./PrintButton";
 import { ShareButton } from "./ShareButton";
+
 export const SalesTable = ({
   isTableLoading,
   getFilteredSales,
@@ -9,6 +10,9 @@ export const SalesTable = ({
   setShowPrintOptions,
   getPeriodLabel,
 }) => {
+  // Helper function to check if text needs truncation
+  const needsTruncation = (text) => text.length > 50; // You can adjust this length
+
   return (
     <div className="bg-white rounded-md max-h-[74vh] overflow-y-scroll [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded-md shadow-lg px-8 py-6">
       <div className="flex justify-between items-center mb-4">
@@ -20,6 +24,7 @@ export const SalesTable = ({
             className="px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
           >
             <option value="today">Today</option>
+            <option value="yesterday">Yesterday</option>
             <option value="week">This Week</option>
             <option value="month">This Month</option>
             <option value="3months">Past 3 Months</option>
@@ -76,7 +81,18 @@ export const SalesTable = ({
                   {new Date(entry.date).toLocaleDateString()}
                 </td>
                 <td className="px-6 py-4 text-sm text-gray-900">
-                  {entry.products.join(", ")}
+                  {needsTruncation(entry.products.join(", ")) ? (
+                    <div className="relative group">
+                      <div className="truncate max-w-xs cursor-pointer">
+                        {entry.products.join(", ")}
+                      </div>
+                      <div className="hidden group-hover:block absolute z-10 bg-white border border-gray-200 rounded-md shadow-lg p-4 max-w-md whitespace-normal left-0 mt-1">
+                        {entry.products.join(", ")}
+                      </div>
+                    </div>
+                  ) : (
+                    entry.products.join(", ")
+                  )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 capitalize">
                   {entry.paymentType}
